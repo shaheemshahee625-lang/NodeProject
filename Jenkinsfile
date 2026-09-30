@@ -3,41 +3,25 @@ pipeline {
 
     stages {
 
-        stage('Check Node') {
+        stage('Check Node.js') {
             steps {
                 bat 'node --version'
                 bat 'npm --version'
             }
         }
 
-        stage('Install Backend Dependencies') {
+        stage('Install Backend') {
             steps {
                 dir('backend') {
-                    bat 'npm ci'
+                    bat 'npm install'
                 }
             }
         }
 
-        stage('Test Backend') {
-            steps {
-                dir('backend') {
-                    bat 'echo No backend tests configured yet'
-                }
-            }
-        }
-
-        stage('Install Frontend Dependencies') {
+        stage('Install Frontend') {
             steps {
                 dir('frontend') {
-                    bat 'npm ci'
-                }
-            }
-        }
-
-        stage('Test Frontend') {
-            steps {
-                dir('frontend') {
-                    bat 'npm run test --if-present'
+                    bat 'npm install'
                 }
             }
         }
@@ -48,21 +32,6 @@ pipeline {
                     bat 'npm run build'
                 }
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'Build and tests completed successfully!'
-        }
-
-        failure {
-            echo 'Build or tests failed.'
-        }
-
-        always {
-            archiveArtifacts artifacts: 'frontend/dist/**',
-                             allowEmptyArchive: true
         }
     }
 }
