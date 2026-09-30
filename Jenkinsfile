@@ -1,36 +1,39 @@
 pipeline {
     agent any
 
+    options {
+        timeout(time: 30, unit: 'MINUTES')
+    }
+
     stages {
-
-        stage('Check Node.js') {
+        stage('Checkout') {
             steps {
-                bat 'node --version'
-                bat 'npm --version'
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/shaheemshahee625-lang/NodeProject.git'
+                    ]],
+                    extensions: [
+                        [$class: 'CloneOption',
+                         shallow: true,
+                         depth: 1,
+                         noTags: true,
+                         timeout: 30]
+                    ]
+                ])
             }
         }
 
-        stage('Install Backend') {
+        stage('Install Dependencies') {
             steps {
-                dir('backend') {
-                    bat 'npm install'
-                }
+                bat 'npm install'
             }
         }
 
-        stage('Install Frontend') {
+        stage('Build') {
             steps {
-                dir('frontend') {
-                    bat 'npm install'
-                }
-            }
-        }
-
-        stage('Build Frontend') {
-            steps {
-                dir('frontend') {
-                    bat 'npm run build'
-                }
+                bat 'npm run build'
             }
         }
     }
