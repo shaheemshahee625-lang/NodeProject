@@ -1,40 +1,68 @@
 pipeline {
     agent any
 
-    options {
-        timeout(time: 30, unit: 'MINUTES')
+    stages {
+
+        stage('Check Node') {
+            steps {
+                bat 'node --version'
+                bat 'npm --version'
+            }
+        }
+
+        stage('Install Backend Dependencies') {
+            steps {
+                dir('backend') {
+                    bat 'npm ci'
+                }
+            }
+        }
+
+        stage('Test Backend') {
+            steps {
+                dir('backend') {
+                    bat 'echo No backend tests configured yet'
+                }
+            }
+        }
+
+        stage('Install Frontend Dependencies') {
+            steps {
+                dir('frontend') {
+                    bat 'npm ci'
+                }
+            }
+        }
+
+        stage('Test Frontend') {
+            steps {
+                dir('frontend') {
+                    bat 'npm run test --if-present'
+                }
+            }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                dir('frontend') {
+                    bat 'npm run build'
+                }
+            }
+        }
     }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: '*/main']],
-                    userRemoteConfigs: [[
-                        url: 'https://github.com/shaheemshahee625-lang/NodeProject.git'
-                    ]],
-                    extensions: [
-                        [$class: 'CloneOption',
-                         shallow: true,
-                         depth: 1,
-                         noTags: true,
-                         timeout: 30]
-                    ]
-                ])
-            }
+    post {
+        success {
+            echo 'Build and tests completed successfully!'
         }
 
-        stage('Install Dependencies') {
-            steps {
-                bat 'npm install'
-            }
+        failure {
+            echo 'Build or tests failed.'
         }
 
-        stage('Build') {
-            steps {
-                bat 'npm run build'
-            }
+        always {
+            archiveArtifacts artifacts: 'frontend/dist/**',
+                             allowEmptyArchive: true
         }
     }
 }
