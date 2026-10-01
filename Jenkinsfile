@@ -1,12 +1,19 @@
 pipeline {
     agent any
 
+    environment {
+        PATH = "C:\\Program Files\\nodejs;${env.PATH}"
+    }
+
     stages {
 
         stage('Check Node.js') {
             steps {
-                bat 'node --version'
-                bat 'npm --version'
+                bat '''
+                    echo Checking Node.js...
+                    node --version
+                    npm --version
+                '''
             }
         }
 
